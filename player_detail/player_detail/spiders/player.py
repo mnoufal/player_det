@@ -16,11 +16,30 @@ class MyplayerSpider(scrapy.Spider):
 		if next_page is not None:
 			next_page = response.urljoin(next_page)
 			yield response.follow(next_page, callback=self.parse_country)
-		with open(filename, 'wb') as f:
-            		f.write(response.body)
 	def parse_country(self, response):
 		filename = 'page2.html'
+		second_page=response.css("div.global-nav-container")[0]
+		second_page1=second_page.css("li.sub")[2]
+		next_page = second_page1.css('a::attr(href)').extract_first()
+
+		if next_page is not None:
+			next_page = response.urljoin(next_page)
+			yield response.follow(next_page, callback=self.parse_players)
 		
+	def parse_players(self, response):
+		filename = 'page3.html'
+		third_page=response.css("table.playersTable tr td")[0]
+		
+		next_page = third_page.css('a::attr(href)').extract_first()
+		
+		if next_page is not None:
+			next_page = response.urljoin(next_page)
+			yield response.follow(next_page, callback=self.parse_details)
+		
+	def parse_details(self, response):
+		filename = 'final_page.html'
+
 		with open(filename, 'wb') as f:
             		f.write(response.body)
+
 
